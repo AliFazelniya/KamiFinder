@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <title>آزمون شخصیت انیمه — مرحله‌ای (فقط ویژگی‌های مجاز)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --bg: #f7f8ff;
+        --card: #fff;
+        --text: #111;
+        --muted: #666;
+        --brand: #6c63ff;
+        --brand2: #544de2;
+        --line: #e9e9f7;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+          Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        margin: 0;
+        padding: 24px;
+        direction: rtl;
+      }
+      h1,
+      h2,
+      h3 {
+        margin: 0 0 16px;
+      }
+      h1 {
+        text-align: center;
+      }
+      .card {
+        background: var(--card);
+        border-radius: 14px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+        padding: 20px;
+        margin: 16px auto;
+        max-width: 1080px;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .ltr {
+        direction: ltr;
+        display: inline-block;
+      }
+      .q {
+        margin: 18px 0;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed var(--line);
+      }
+      .likert {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .likert label {
+        background: #f2f3ff;
+        border: 1px solid #e5e7ff;
+        border-radius: 999px;
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+      .row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .col {
+        flex: 1 1 280px;
+      }
+      .btn {
+        display: inline-block;
+        background: var(--brand);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 16px;
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .btn:hover {
+        background: var(--brand2);
+      }
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid var(--line);
+        color: #333;
+      }
+      .actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+      .hide {
+        display: none;
+      }
+      .progress {
+        height: 8px;
+        background: #eceeff;
+        border-radius: 999px;
+        overflow: hidden;
+        margin: 8px 0 0;
+      }
+      .bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--brand), var(--brand2));
+        width: 0%;
+      }
+      .result-item {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px;
+        margin: 10px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .pill {
+        background: #eef0ff;
+        color: #3733ff;
+        border-radius: 999px;
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+      .traits {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .note {
+        padding: 10px;
+        border-radius: 8px;
+        background: #fff6e5;
+        border: 1px solid #ffe2a8;
+        margin: 10px 0;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+      }
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 6px 8px;
+        text-align: right;
+        font-size: 14px;
+      }
+      th {
+        background: #f6f7ff;
+      }
+      .details {
+        margin-top: 8px;
+      }
+      .small {
+        font-size: 12px;
+      }
+      .right {
+        text-align: right;
+        direction: ltr;
+      }
+      .opt {
+        display: block;
+        padding: 8px 10px;
+        margin: 6px 0;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fafbff;
+        cursor: pointer;
+      }
+      .opt input {
+        margin-right: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>آزمون شخصیت انیمه</h1>
+
+    <!-- STEP 0: Load -->
+    <div id="load" class="card">
+      <h2>۱) بارگذاری داده‌های شخصیت</h2>
+      <p class="muted">
+        فایل‌های <b>index.html</b> و <b>updated.json</b> را کنار هم قرار دهید.
+        اگر بارگذاری انجام نشد، یک سرور محلی راه‌اندازی کنید (<code
+          >python -m http.server 8000</code
+        >) و آدرس <code>http://localhost:8000</code> را باز کنید.
+      </p>
+      <div class="note hide" id="loadNote"></div>
+      <button class="btn" id="loadBtn">
+        بارگذاری <code>updated.json</code>
+      </button>
+    </div>
+
+    <!-- PHASE 1: 25 Primary Questions -->
+    <div id="phase1" class="card hide">
+      <div class="row">
+        <div class="col"><h2>۲) ویژگی‌های اصلی (۲۵ سوال)</h2></div>
+        <div class="col">
+          <div class="muted">امتیاز ۱ تا ۵: کاملاً مخالف ← کاملاً موافق</div>
+          <div class="progress"><div id="p1" class="bar"></div></div>
+        </div>
+      </div>
+      <div id="qPPrimary"></div>
+      <div class="actions">
+        <span class="muted ltr" id="c1">0/25 پاسخ داده شده</span>
+        <button class="btn" id="toPhase2">ادامه</button>
+      </div>
+    </div>
+
+    <!-- PHASE 2: MBTI -->
+    <div id="phase2" class="card hide">
+      <h2>۳) MBTI (اختیاری)</h2>
+      <div class="row">
+        <div class="col">
+          <label for="mbti">MBTI</label>
+          <input id="mbti" type="text" placeholder="مثلاً INTJ" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="toPhase3">بعدی</button>
+      </div>
+    </div>
+
+    <!-- PHASE 3: Secondary (Bank of 35 → show 15) -->
+    <div id="phase3" class="card hide">
+      <div class="row">
+        <div class="col">
+          <h2>۴) ویژگی‌های ثانویه (۱۵ مورد از ۳۵)</h2>
+        </div>
+        <div class="col">
+          <div class="muted">
+            بر اساس شخصیت‌هایی که بیشترین شباهت را دارند انتخاب شده‌اند.
+          </div>
+          <div class="progress"><div id="p3" class="bar"></div></div>
+        </div>
+      </div>
+      <div id="qPSecondary"></div>
+      <div class="actions">
+        <span class="muted ltr" id="c3">0/15 پاسخ داده شده</span>
+        <button class="btn" id="toPhase4">ادامه</button>
+      </div>
+    </div>
+
+    <!-- PHASE 4: Preferences (5 random + anime_type) -->
+    <div id="phase4" class="card hide">
+      <div class="row">
+        <div class="col"><h2>۵) ترجیحات (۶ سوال)</h2></div>
+        <div class="col">
+          <div class="muted">
+            بهترین گزینه را انتخاب کنید. سوال آخر نوع انیمه‌ی شما را می‌پرسد.
+          </div>
+          <div class="progress"><div id="pPref" class="bar"></div></div>
+        </div>
+      </div>
+      <div id="qPrefs"></div>
+      <div class="actions">
+        <span class="muted ltr" id="cPref">0/6 پاسخ داده شده</span>
+        <button class="btn" id="toPhase5">ادامه</button>
+      </div>
+    </div>
+
+    <!-- PHASE 5: Adaptive (5) -->
+    <div id="phase5" class="card hide">
+      <div class="row">
+        <div class="col"><h2>۶) سوالات تطبیقی (۵ سوال)</h2></div>
+        <div class="col">
+          <div class="muted">
+            بر اساس انگیزه‌ها و تصمیم‌ها (بدون اعمال یا پیچش داستانی).
+          </div>
+          <div class="progress"><div id="pA" class="bar"></div></div>
+        </div>
+      </div>
+      <div id="qAdaptive"></div>
+      <div class="actions">
+        <span class="muted ltr" id="cA">0/5 پاسخ داده شده</span>
+        <button class="btn" id="seeResults">مشاهده نتایج</button>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="results" class="card hide">
+      <h2>۷) نتایج شما</h2>
+      <div class="muted" id="yourType"></div>
+      <div id="topOne" class="result-item" style="margin-top: 10px"></div>
+
+      <h3 style="margin-top: 20px">۳۰ شخصیت مشابه برتر</h3>
+      <div id="topList"></div>
+
+      <h3 style="margin-top: 24px">میانگین امتیاز ویژگی‌های اصلی شما</h3>
+      <div id="userPrimary"></div>
+
+      <h3 style="margin-top: 24px">میانگین امتیاز ویژگی‌های ثانویه شما</h3>
+      <div id="userSecondary"></div>
+
+      <div class="note small">
+        برای دیدن مقایسه‌ی جزءبه‌جزء ویژگی‌ها روی «نمایش جزئیات» در کنار هر
+        شخصیت کلیک کنید (تمام ویژگی‌های به‌کاررفته در آزمون).
+      </div>
+    </div>
+
+    <script>
+      /* ====== Helpers ====== */
+      const byId = (id) => document.getElementById(id);
+      const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+      const toPct = (x) => (x * 100).toFixed(1) + "%";
+      const title = (s) => (s || "").replace(/\s+/g, " ").trim();
+      const pickN = (arr, n) => {
+        const c = [...arr],
+          out = [];
+        while (out.length < n && c.length) {
+          out.push(c.splice(Math.floor(Math.random() * c.length), 1)[0]);
+        }
+        return out;
+      };
+
+      /* ====== Allowed Traits (from your DB) ====== */
+      const ALLOWED_TRAITS = [
+        "Bravery",
+        "Determination",
+        "Teamwork",
+        "Empathy",
+        "Strategy",
+        "Recklessness",
+        "Overconfidence",
+        "Impulsiveness",
+        "Naivety",
+        "Stubbornness",
+        "Logic",
+        "Ambition",
+        "Morality",
+        "Intelligence",
+        "Manipulativeness",
+        "Arrogance",
+        "Detachment",
+        "Obsessiveness",
+        "Moral Rigidity",
+        "Sensitivity",
+        "Optimism",
+        "Creativity",
+        "Humor",
+        "Insecurity",
+        "Idealism",
+        "Jealousy",
+        "Overattachment",
+        "Emotional Instability",
+        "Courage",
+        "Curiosity",
+        "Leadership",
+        "Adaptability",
+        "Kindness",
+        "Escapism",
+        "Overtrusting",
+      ];
+
+      const TRAIT_LABELS = {
+        Bravery: "شجاعت",
+        Determination: "اراده",
+        Teamwork: "کار تیمی",
+        Empathy: "همدلی",
+        Strategy: "استراتژی",
+        Recklessness: "بی‌پروا بودن",
+        Overconfidence: "اعتمادبه‌نفس بیش از حد",
+        Impulsiveness: "تکانشی بودن",
+        Naivety: "ساده‌دلی",
+        Stubbornness: "لجاجت",
+        Logic: "منطق",
+        Ambition: "جاه‌طلبی",
+        Morality: "اخلاق‌مداری",
+        Intelligence: "هوش",
+        Manipulativeness: "دستکاری‌گری",
+        Arrogance: "غرور",
+        Detachment: "بی‌تفاوتی",
+        Obsessiveness: "وسواس",
+        "Moral Rigidity": "سخت‌گیری اخلاقی",
+        MoralRigidity: "سخت‌گیری اخلاقی",
+        Sensitivity: "حساسیت",
+        Optimism: "خوش‌بینی",
+        Creativity: "خلاقیت",
+        Humor: "شوخ‌طبعی",
+        Insecurity: "ناامنی",
+        Idealism: "آرمان‌گرایی",
+        Jealousy: "حسادت",
+        Overattachment: "وابستگی بیش از حد",
+        "Emotional Instability": "نوسان هیجانی",
+        Courage: "دلیرى",
+        Curiosity: "کنجکاوی",
+        Leadership: "رهبری",
+        Adaptability: "سازگاری",
+        Kindness: "مهربانی",
+        Escapism: "گریز از واقعیت",
+        Overtrusting: "زیاده‌باور بودن",
+        Confidence: "اعتمادبه‌نفس",
+        Aggressiveness: "پرخاشگری",
+        Integrity: "درستکاری",
+      };
+
+      const traitLabel = (trait) => TRAIT_LABELS[trait] || trait;
+
+      const TYPE_LABELS = {
+        theme: "تم",
+        decision: "تصمیم",
+      };
+
+      /* ====== Global State ====== */
+      let CHARACTERS = [];
+      let USER_MBTI = "";
+      let USER_ANIME_TYPE = null;
+
+      /* Phase 1: primary */
+      let P1_REC = {}; // {trait:{sum, w}}
+      let P1_VEC = {}; // averaged
+      let P1_TRAIT_KEYS = []; // union across P1 questions
+
+      /* Phase 3: secondary */
+      let SEC_BANK = []; // 35 Qs
+      let SEC_PICKED = []; // 15 selected
+      let P3_REC = {}; // {trait:{sum, w}}
+      let P3_VEC = {}; // averaged
+      let ALL_TRAIT_KEYS = []; // union of traits in P1+P3
+      let CURRENT_TOP20 = []; // for building phase 3 and phase 5
+
+      /* Preferences */
+      let PREFS_POOL = [];
+      let PREFS_PICKED = [];
+      let PREFS_ANS = {};
+      let PREFS_TAG_TALLY = {}; // tag -> count
+
+      /* Adaptive (5) */
+      let ADAPTIVE_QS = [];
+      let ADAPTIVE_ANS = {}; // key -> 1..5
+
+      /* ====== Character flattening (average duplicates) ====== */
+      function flattenCharacterTraitsAveraged(char) {
+        const rec = {};
+        const traits = char.traits || {};
+        for (const genre of Object.keys(traits)) {
+          for (const sign of ["positive", "negative"]) {
+            const bag = traits[genre]?.[sign] || {};
+            for (const k of Object.keys(bag)) {
+              const v = Number(bag[k] || 0);
+              if (!rec[k]) rec[k] = { sum: 0, count: 0 };
+              rec[k].sum += v;
+              rec[k].count += 1;
+            }
+          }
+        }
+        const avg = {};
+        for (const k of Object.keys(rec)) {
+          avg[k] = rec[k].sum / Math.max(1, rec[k].count);
+        }
+        return avg;
+      }
+
+      function getCharVectorForKeys(char, keys) {
+        const avg = flattenCharacterTraitsAveraged(char);
+        const out = {};
+        keys.forEach((k) => (out[k] = Number(avg[k] || 0)));
+        return out;
+      }
+
+      function cosineSim(a, b, keys) {
+        let dot = 0,
+          na = 0,
+          nb = 0;
+        for (const k of keys) {
+          const x = Number(a[k] || 0),
+            y = Number(b[k] || 0);
+          dot += x * y;
+          na += x * x;
+          nb += y * y;
+        }
+        const denom = Math.sqrt(na) * Math.sqrt(nb);
+        return denom ? dot / denom : 0;
+      }
+
+      /* ====== Load JSON ====== */
+      byId("loadBtn").onclick = async () => {
+        try {
+          const res = await fetch("updated.json", { cache: "no-store" });
+          if (!res.ok) throw new Error(res.status + " " + res.statusText);
+          CHARACTERS = await res.json();
+          byId("load").classList.add("hide");
+          startPhase1();
+        } catch (e) {
+          byId("loadNote").innerHTML = `
+      <b>فایل <code>updated.json</code> بارگذاری نشد.</b><br>
+      خطا: ${e.message}<br><br>
+      <b>راه‌حل:</b> این پوشه را با یک سرور محلی اجرا کنید.<br>
+      مثال: <code>python -m http.server 8000</code> → سپس <code>http://localhost:8000</code> را باز کنید.
+    `;
+          byId("loadNote").classList.remove("hide");
+        }
+      };
+
+      /* ====== Phase 1: 25 Primary (weighted, allowed traits only) ====== */
+      const Q = (id, text, traits) => ({ id, text, traits }); // traits = {TraitName: weight} (weights can be negative for inverse phrasing)
+
+      // 25 primary questions
+      const P1_BANK = [
+        Q(1, "برای بلندمدت برنامه‌ریزی می‌کنم و آن را تا انتها پیش می‌برم.", {
+          Strategy: 1.0,
+          Determination: 0.6,
+          Logic: 0.4,
+        }),
+        Q(2, "پیش از عمل کردن چند مسیر مختلف را بررسی می‌کنم.", {
+          Strategy: 1.0,
+          Curiosity: 0.6,
+          Intelligence: 0.4,
+        }),
+        Q(3, "زیر فشار آرام و منطقی می‌مانم.", {
+          Logic: 1.0,
+          Detachment: 0.5,
+          Courage: 0.3,
+        }),
+        Q(4, "در انتخاب‌های دشوار احساسات نباید از واقعیت‌ها مهم‌تر شوند.", {
+          Logic: 1.0,
+          Strategy: 0.5,
+          Empathy: -0.3,
+        }),
+        Q(5, "حل مسائل پیچیده برایم هیجان‌انگیز است.", {
+          Intelligence: 1.0,
+          Curiosity: 0.6,
+          Creativity: 0.4,
+        }),
+        Q(6, "افراد را به‌صورت مؤثر در مسیر یک هدف سازمان‌دهی می‌کنم.", {
+          Leadership: 1.0,
+          Teamwork: 0.6,
+          Strategy: 0.4,
+        }),
+        Q(7, "کارها را به افراد مناسب واگذار می‌کنم.", {
+          Leadership: 1.0,
+          Strategy: 0.6,
+          Teamwork: 0.5,
+        }),
+        Q(8, "حتی وقتی پیشرفت کند است، همچنان پیش می‌روم.", {
+          Determination: 1.0,
+          Stubbornness: 0.5,
+          Ambition: 0.4,
+        }),
+        Q(9, "هرگاه لازم باشد سریع رویکردم را عوض می‌کنم.", {
+          Adaptability: 1.0,
+          Creativity: 0.5,
+          Impulsiveness: 0.2,
+        }),
+        Q(10, "ایده هایی که به ذهنم می‌آید را از روی کنجکاوی دنبال می‌کنیم.", {
+          Curiosity: 1.0,
+          Creativity: 0.3,
+        }),
+        Q(11, "در لحظه راه‌حل‌های خلاقانه ارائه می‌دهم.", {
+          Creativity: 1.0,
+          Adaptability: 0.6,
+          Intelligence: 0.3,
+        }),
+        Q(12, "انتخاب‌هایی را که اصولم را زیر پا بگذارند رد می‌کنم.", {
+          Morality: 1.0,
+          MoralRigidity: 0.6,
+          Courage: 0.3,
+        }),
+        Q(13, "برای راحتی از ارزش‌هایم چشم‌پوشی نمی‌کنم.", {
+          MoralRigidity: 1.0,
+          Morality: 0.8,
+          Courage: 0.2,
+        }),
+        Q(14, "مایلم به دیگران بعد از اشتباهشان فرصت دوباره بدهم.", {
+          Empathy: 1.0,
+          Kindness: 0.6,
+          Naivety: 0.3,
+        }),
+        Q(15, "بدون نیاز صحبت کردن احساس دیگران را درک می‌کنم.", {
+          Empathy: 1.0,
+          Sensitivity: 0.5,
+          Teamwork: 0.3,
+        }),
+        Q(16, "با یک گروه به‌خوبی هماهنگ می‌شوم.", {
+          Teamwork: 1.0,
+          Leadership: 0.6,
+          Empathy: 0.2,
+        }),
+        Q(17, "حتی اگر خطرناک باشد کار درست را انجام می‌دهم.", {
+          Courage: 1.0,
+          Morality: 0.6,
+          Bravery: 0.6,
+          Naivety: 0.2,
+        }),
+        Q(18, "در صورت نیاز برای کارهای پرخطر داوطلب می‌شوم.", {
+          Bravery: 1.0,
+          Courage: 0.6,
+          Recklessness: 0.5,
+        }),
+        Q(19, "در شرایط پر تنش احساساتم را کنترل می‌کنم.", {
+          Bravery: 0.8,
+          Detachment: 0.6,
+          Logic: 0.4,
+        }),
+        Q(20, "لحظه‌های پرتنش را با شوخی سبک می‌کنم.", {
+          Humor: 1.0,
+          Optimism: 0.5,
+          Empathy: 0.3,
+        }),
+        Q(21, "برای خودم اهداف  جسورانه و بلند پروازانه تعیین می‌کنم.", {
+          Ambition: 1.0,
+          Overconfidence: 0.4,
+          Determination: 0.5,
+        }),
+        Q(22, "کاری را که شروع می‌کنم به پایان می‌رسانم.", {
+          Determination: 1.0,
+          Stubbornness: 0.5,
+          Leadership: 0.2,
+        }),
+        Q(23, "وقتی تصمیم بگیرم به‌ندرت نظرم را عوض می‌کنم.", {
+          Stubbornness: 1.0,
+          Determination: 0.6,
+          MoralRigidity: 0.2,
+        }),
+        Q(24, "حتی اگر نقشه کامل نشده باشد سریع عمل می‌کنم.", {
+          Impulsiveness: 1.0,
+          Recklessness: 0.5,
+          Adaptability: 0.4,
+        }),
+        Q(25, "به‌سادگی به دیگران اعتماد می‌کنم.", {
+          Overtrusting: 1.0,
+          Naivety: 0.7,
+          Empathy: 0.4,
+        }),
+      ];
+
+      let P1_TRAITS_SET = new Set(
+        P1_BANK.flatMap((q) => Object.keys(q.traits))
+      );
+      P1_TRAIT_KEYS = Array.from(P1_TRAITS_SET);
+
+      function startPhase1() {
+        const host = byId("qPPrimary");
+        host.innerHTML = "";
+        P1_REC = {};
+        P1_BANK.forEach((q, i) => {
+          const [primary] = Object.entries(q.traits).sort(
+            (a, b) => Math.abs(b[1]) - Math.abs(a[1])
+          )[0];
+          const div = document.createElement("div");
+          div.className = "q";
+          div.innerHTML = `
+      <div><b>${i + 1}.</b> ${q.text} <span class="muted">(${traitLabel(
+            primary
+          )})</span></div>
+      <div class="likert" data-qid="${q.id}">
+        ${[1, 2, 3, 4, 5]
+          .map(
+            (v) =>
+              `<label><input type="radio" name="p1_${i}" value="${v}"> ${v}</label>`
+          )
+          .join("")}
+      </div>`;
+          host.appendChild(div);
+        });
+        host.addEventListener("change", updatePhase1Progress);
+        updatePhase1Progress();
+
+        byId("phase1").classList.remove("hide");
+        byId("toPhase2").onclick = () => {
+          const answered = document.querySelectorAll(
+            "#qPPrimary input[type=radio]:checked"
+          ).length;
+          if (answered !== P1_BANK.length) {
+            alert("لطفاً به تمام ۲۵ سوال پاسخ دهید.");
+            return;
+          }
+          // build averaged P1_VEC
+          P1_VEC = {};
+          Object.entries(P1_REC).forEach(([t, { sum, w }]) => {
+            P1_VEC[t] = sum / Math.max(1e-9, w);
+          });
+          byId("phase1").classList.add("hide");
+          byId("phase2").classList.remove("hide");
+        };
+      }
+
+      function updatePhase1Progress() {
+        const groups = [...document.querySelectorAll("#qPPrimary .likert")];
+        let answered = 0;
+        P1_REC = {};
+        groups.forEach((g, i) => {
+          const checked = g.querySelector("input:checked");
+          if (checked) {
+            answered++;
+            const val = Number(checked.value); // 1..5
+            const q = P1_BANK[i];
+            for (const [trait, wt] of Object.entries(q.traits)) {
+              if (!P1_REC[trait]) P1_REC[trait] = { sum: 0, w: 0 };
+              P1_REC[trait].sum += val * wt; // negative weights invert effect for inverse phrasing
+              P1_REC[trait].w += Math.abs(wt);
+            }
+          }
+        });
+        byId("c1").textContent = `${answered}/${P1_BANK.length} پاسخ داده شده`;
+        byId("p1").style.width = (answered / P1_BANK.length) * 100 + "%";
+      }
+
+      /* ====== Phase 2: MBTI ====== */
+      byId("toPhase3").onclick = () => {
+        USER_MBTI = (byId("mbti").value || "").trim().toUpperCase();
+        CURRENT_TOP20 = selectTopNByPrimary(20); // based on P1 + MBTI
+        startPhase3(); // build secondary
+        byId("phase2").classList.add("hide");
+        byId("phase3").classList.remove("hide");
+      };
+
+      function selectTopNByPrimary(n) {
+        const keys = P1_TRAIT_KEYS;
+        const scored = CHARACTERS.map((c) => {
+          const cv = getCharVectorForKeys(c, keys);
+          let s = cosineSim(P1_VEC, cv, keys);
+          if (USER_MBTI && (c.mbti || "").toUpperCase() === USER_MBTI)
+            s += 0.05;
+          return { c, score: s };
+        }).sort((a, b) => b.score - a.score);
+        return scored.slice(0, n).map((x) => x.c);
+      }
+
+      /* ====== Phase 3: Secondary Bank (35) → pick 15 ====== */
+      const S = (id, text, traits) => ({ id, text, traits });
+
+      // 35 secondary questions — ONLY allowed traits; mix of direct negs and inversions via negative weights
+      SEC_BANK = [
+        S(1, "به موقعیت‌های پرریسک جذب می‌شوم.", {
+          Ambition: 0.8,
+          Bravery: 0.6,
+          Recklessness: 0.4,
+        }),
+        S(2, "حتی اگر مغرور به نظر برسد رک صحبت می‌کنم.", {
+          Arrogance: 1.0,
+          Confidence: 0.0,
+        }), // Arrogance only (Confidence ignored)
+        S(3, "برای رسیدن به نتیجه دیگران را نامحسوس هدایت می‌کنم.", {
+          Manipulativeness: 1.0,
+          Strategy: 0.4,
+          Leadership: 0.3,
+        }),
+        S(4, "احساسات دیگران را سریع می‌خوانم و واکنش نشان می‌دهم.", {
+          Empathy: 0.8,
+          Sensitivity: 0.8,
+        }),
+        S(5, "خودم را مسئول موفقیت گروه می‌دانم.", {
+          Leadership: 0.8,
+          Teamwork: 0.7,
+          Kindness: 0.3,
+        }),
+        S(
+          6,
+          "به‌جای میان‌برهای شتاب‌زده، راه‌حل‌های سنجیده و زیبا را برمی‌گزینم.",
+          {
+            Creativity: 0.6,
+            Logic: 0.5,
+            Strategy: 0.7,
+          }
+        ),
+        S(7, "حتی بعد از رنجیدن به‌راحتی می‌بخشم.", {
+          Kindness: 0.8,
+          Overattachment: 0.4,
+          Naivety: 0.3,
+        }),
+        S(8, "از بحث‌هایی که نیاز به تحلیل و تفکر دارند، لذت می‌برم.", {
+          Intelligence: 0.8,
+          Logic: 0.6,
+        }),
+        S(9, "در بحران به غرایزم اعتماد می‌کنم.", {
+          Impulsiveness: 0.8,
+          Courage: 0.5,
+          Adaptability: 0.4,
+        }),
+        S(
+          10,
+          "عادت دارم طبق اصول و برنامه‌های سخت‌گیرانه‌ی خودم پیش بروم و رفتار کنم.",
+          {
+            MoralRigidity: 0.6,
+            Determination: 0.6,
+            Obsessiveness: 0.4,
+          }
+        ),
+        S(
+          11,
+          "بزرگ‌ترین انگیزه‌ام در زندگی، محافظت از کسانی است که دوستشان دارم.",
+          {
+            Overattachment: 0.8,
+            Kindness: 0.6,
+            Courage: 0.3,
+          }
+        ),
+        S(
+          12,
+          "در صورت نیاز، برای پیشبرد هدف، از افزایش فشار یا چالش ابایی ندارم.",
+          {
+            Bravery: 0.6,
+            Strategy: 0.4,
+            Aggressiveness: 0.0,
+          }
+        ), // no Aggressiveness in allowed set
+        S(13, "در کار گروهی، هماهنگی را بر رقابت ترجیح می‌دهم.", {
+          Teamwork: 0.8,
+          Empathy: 0.6,
+          Kindness: 0.5,
+        }),
+        S(14, "در عمل، اجازه نمی‌دهم احساسات بر من غلبه کنند.", {
+          Detachment: 1.0,
+          Logic: 0.9,
+        }),
+        S(15, "موفقیت‌ها و خطاهایم را به راحتی می‌پذیرم.", {
+          Leadership: 0.6,
+          Morality: 0.5,
+        }),
+        S(16, "از رمزگشایی از رازهای درون انسان لذت می‌برم.", {
+          Curiosity: 0.8,
+          Intelligence: 0.3,
+          Empathy: 0.3,
+        }),
+        S(17, "برای برنامه‌های بلندمدت از بردهای کوتاه‌مدت می‌گذرم.", {
+          Strategy: 0.9,
+          Determination: 0.6,
+        }),
+        S(18, "در برابر فشار و قضاوت دیگران تسلیم نمی‌شوم.", {
+          Stubbornness: 0.5,
+          MoralRigidity: 0.5,
+          Determination: 0.4,
+        }),
+        S(19, "ریسک بالا زندگی را هیجان‌انگیز می‌کند.", {
+          Recklessness: 0.9,
+          Impulsiveness: 0.6,
+          Ambition: 0.4,
+        }),
+        S(20, "بدون انتظار دریافت چیزی به دیگران کمک می‌کنم.", {
+          Kindness: 0.9,
+          Empathy: 0.7,
+          Morality: 0.4,
+        }),
+        S(
+          21,
+          "ترجیح می‌دهم در محیطی با سلسله‌مراتب و نقش‌های مشخص فعالیت کنم.",
+          {
+            Leadership: 0.5,
+            Teamwork: 0.5,
+            MoralRigidity: 0.4,
+          }
+        ),
+        S(
+          22,
+          "همیشه می‌توانم شرایط را بسنجم و بسته به شرایط، تصمیم می‌گیرم چه اطلاعاتی را فاش کنم و چه چیزی را پنهان نگه دارم",
+          {
+            Manipulativeness: 0.9,
+            Strategy: 0.6,
+            Intelligence: 0.4,
+          }
+        ),
+        S(23, "تازگی و تجربه‌های جدید را دوست دارم.", {
+          Curiosity: 0.8,
+          Creativity: 0.6,
+          Optimism: 0.4,
+        }),
+        S(24, "رفتار ناعادلانه برایم پذیرفتنی نیست.", {
+          Morality: 0.8,
+          Courage: 0.5,
+          Determination: 0.4,
+        }),
+        S(25, "شوخ‌طبعی ابزاری است که زیاد از آن استفاده می‌کنم.", {
+          Humor: 0.9,
+          Optimism: 0.5,
+          Empathy: 0.3,
+        }),
+        S(26, "کینه به دل می‌گیرم.", {
+          Resentment: 0.0,
+          Overattachment: 0.6,
+          Stubbornness: 0.6,
+        }), // no Resentment in allowed set → removed weight
+        S(27, "برنامه‌ریزی دقیق را به بداهه‌پردازی ترجیح می‌دهم.", {
+          Strategy: 0.8,
+          Logic: 0.6,
+          Adaptability: -0.3,
+        }),
+        S(28, "کنجکاوی درباره ناشناخته‌ها به من انگیزه می‌دهد.", {
+          Curiosity: 1.0,
+          Intelligence: 0.3,
+        }),
+        S(29, "خودم را مسئول روحیه تیم می‌دانم.", {
+          Leadership: 0.5,
+          Kindness: 0.4,
+          Empathy: 0.5,
+        }),
+        S(30, "در هر زمان بر یک هدف با تمرکز شدید کار می‌کنم.", {
+          Obsessiveness: 0.9,
+          Determination: 0.6,
+          Detachment: 0.3,
+        }),
+        S(31, "ترجیح می‌دهم محترم باشم تا دوست‌داشتنی.", {
+          Arrogance: 0.5,
+          Leadership: 0.4,
+          Detachment: 0.3,
+        }),
+        S(32, "رفتارم را با گروه‌های مختلف تطبیق می‌دهم.", {
+          Adaptability: 0.9,
+          Empathy: 0.3,
+          Manipulativeness: 0.3,
+        }),
+        S(
+          33,
+          "حتی اگر برایم هزینه داشته باشد از آسیب زدن به دیگران پرهیز می‌کنم.",
+          {
+            Kindness: 0.9,
+            Empathy: 0.7,
+            Morality: 0.4,
+            Strategy: -0.3,
+          }
+        ),
+        S(
+          34,
+          "در برابر تصمیم‌های نادرستِ افراد قدرتمند یا با نفوذ، سکوت نمی‌کنم.",
+          {
+            Courage: 0.7,
+            Morality: 0.6,
+            Determination: 0.4,
+            Leadership: 0.1,
+          }
+        ),
+        S(35, "حقیقت ناخوشایند را به دروغ آرامش‌بخش ترجیح می‌دهم.", {
+          Morality: 0.7,
+          Logic: 0.5,
+          Integrity: 0.0,
+        }), // Integrity not allowed → ignored
+      ].map((q) => {
+        // sanitize: drop any weights whose trait isn't allowed
+        const cleanTraits = {};
+        Object.entries(q.traits).forEach(([t, w]) => {
+          if (ALLOWED_TRAITS.includes(t) && w !== 0) cleanTraits[t] = w;
+        });
+        return { ...q, traits: cleanTraits };
+      });
+
+      function computeTraitImportanceFromTop(chars) {
+        const agg = {};
+        chars.forEach((c) => {
+          const m = flattenCharacterTraitsAveraged(c);
+          Object.entries(m).forEach(([trait, val]) => {
+            if (!ALLOWED_TRAITS.includes(trait)) return;
+            agg[trait] = (agg[trait] || 0) + val;
+          });
+        });
+        const maxv = Math.max(1e-9, ...Object.values(agg));
+        Object.keys(agg).forEach((k) => (agg[k] = agg[k] / maxv));
+        return agg;
+      }
+
+      function rankSecondaryQuestions(traitImportance) {
+        return SEC_BANK.map((q) => {
+          const score = Object.entries(q.traits).reduce((s, [t, wt]) => {
+            return s + wt * (traitImportance[t] || 0);
+          }, 0);
+          return { q, score };
+        }).sort((a, b) => b.score - a.score);
+      }
+
+      function select15Secondary() {
+        const imp = computeTraitImportanceFromTop(CURRENT_TOP20);
+        const ranked = rankSecondaryQuestions(imp);
+        const CAP = 3; // cap per primary trait
+        const chosen = [];
+        const capCount = {};
+        for (const item of ranked) {
+          const q = item.q;
+          const [primary] = Object.entries(q.traits).sort(
+            (a, b) => Math.abs(b[1]) - Math.abs(a[1])
+          )[0];
+          const used = capCount[primary] || 0;
+          if (used < CAP) {
+            chosen.push(q);
+            capCount[primary] = used + 1;
+          }
+          if (chosen.length >= 15) break;
+        }
+        let i = 0;
+        while (chosen.length < 15 && i < ranked.length) {
+          if (!chosen.includes(ranked[i].q)) chosen.push(ranked[i].q);
+          i++;
+        }
+        return chosen.slice(0, 15);
+      }
+
+      function startPhase3() {
+        SEC_PICKED = select15Secondary();
+        const host = byId("qPSecondary");
+        host.innerHTML = "";
+        P3_REC = {};
+
+        SEC_PICKED.forEach((q, i) => {
+          const [primary] = Object.entries(q.traits).sort(
+            (a, b) => Math.abs(b[1]) - Math.abs(a[1])
+          )[0];
+          const div = document.createElement("div");
+          div.className = "q";
+          div.innerHTML = `
+      <div><b>${i + 1}.</b> ${q.text} <span class="muted">(${traitLabel(
+            primary
+          )})</span></div>
+      <div class="likert" data-qid="${q.id}">
+        ${[1, 2, 3, 4, 5]
+          .map(
+            (v) =>
+              `<label><input type="radio" name="p3_${i}" value="${v}"> ${v}</label>`
+          )
+          .join("")}
+      </div>`;
+          host.appendChild(div);
+        });
+
+        host.addEventListener("change", updatePhase3Progress);
+        updatePhase3Progress();
+
+        byId("toPhase4").onclick = () => {
+          const answered = document.querySelectorAll(
+            "#qPSecondary input[type=radio]:checked"
+          ).length;
+          if (answered !== SEC_PICKED.length) {
+            alert("لطفاً به تمام ۱۵ سوال پاسخ دهید.");
+            return;
+          }
+          // build averaged P3_VEC
+          P3_VEC = {};
+          Object.entries(P3_REC).forEach(([t, { sum, w }]) => {
+            P3_VEC[t] = sum / Math.max(1e-9, w);
+          });
+          const set = new Set([...Object.keys(P1_VEC), ...Object.keys(P3_VEC)]);
+          ALL_TRAIT_KEYS = Array.from(set);
+
+          byId("phase3").classList.add("hide");
+          startPhase4();
+          byId("phase4").classList.remove("hide");
+        };
+      }
+
+      function updatePhase3Progress() {
+        const groups = [...document.querySelectorAll("#qPSecondary .likert")];
+        let answered = 0;
+        P3_REC = {};
+        groups.forEach((g, i) => {
+          const checked = g.querySelector("input:checked");
+          if (checked) {
+            answered++;
+            const val = Number(checked.value);
+            const q = SEC_PICKED[i];
+            for (const [trait, wt] of Object.entries(q.traits)) {
+              if (!P3_REC[trait]) P3_REC[trait] = { sum: 0, w: 0 };
+              P3_REC[trait].sum += val * wt;
+              P3_REC[trait].w += Math.abs(wt);
+            }
+          }
+        });
+        byId(
+          "c3"
+        ).textContent = `${answered}/${SEC_PICKED.length} پاسخ داده شده`;
+        byId("p3").style.width = (answered / SEC_PICKED.length) * 100 + "%";
+      }
+
+      /* ====== Phase 4: Preferences (5 random + anime_type) ====== */
+      PREFS_POOL = [
+        {
+          id: "conflict_style",
+          prompt: "وقتی تعارض پیش می‌آید معمولاً…",
+          options: [
+            {
+              k: "negotiate",
+              label: "مذاکره برای برد-برد",
+              tags: ["Empathy", "Kindness", "Teamwork"],
+            },
+            {
+              k: "analyze",
+              label: "تحلیل و انتخاب بهترین حرکت",
+              tags: ["Logic", "Strategy"],
+            },
+            {
+              k: "push",
+              label: "با اراده پیش می‌روم",
+              tags: ["Determination", "Courage"],
+            },
+            {
+              k: "outmaneuver",
+              label: "بی‌سروصدا طرف مقابل را دور می‌زنم",
+              tags: ["Strategy", "Manipulativeness"],
+            },
+          ],
+        },
+        {
+          id: "work_mode",
+          prompt: "ترجیح می‌دهید کار کنید…",
+          options: [
+            { k: "team", label: "در یک تیم", tags: ["Teamwork", "Leadership"] },
+            { k: "solo", label: "بیشتر به تنهایی", tags: ["Detachment"] },
+            {
+              k: "pair",
+              label: "با یک شریک نزدیک",
+              tags: ["Empathy", "Kindness"],
+            },
+          ],
+        },
+        {
+          id: "story_tone",
+          prompt: "لحن داستان مورد علاقه‌تان؟",
+          options: [
+            {
+              k: "hopeful",
+              label: "امیدبخش و انگیزشی",
+              tags: ["Optimism", "Kindness"],
+            },
+            {
+              k: "intense",
+              label: "تحلیل‌گر و بلندپرواز",
+              tags: ["Logic", "Ambition"],
+            },
+            {
+              k: "romance",
+              label: "احساسی و رمانتیک‌محور",
+              tags: ["Empathy", "Sensitivity"],
+            },
+            {
+              k: "epic",
+              label: "اکشن حماسی و شجاعت",
+              tags: ["Courage", "Bravery"],
+            },
+          ],
+        },
+        {
+          id: "decision_basis",
+          prompt: "تصمیم‌های بزرگ بیشتر بر پایه…",
+          options: [
+            {
+              k: "logic",
+              label: "منطق و شواهد",
+              tags: ["Logic", "Intelligence"],
+            },
+            {
+              k: "principles",
+              label: "اصول و ارزش‌ها",
+              tags: ["Morality", "Moral Rigidity"],
+            },
+            {
+              k: "feelings",
+              label: "احساسات و پیوندها",
+              tags: ["Empathy", "Sensitivity"],
+            },
+            {
+              k: "momentum",
+              label: "غریزه و شتاب لحظه‌ای",
+              tags: ["Impulsiveness", "Recklessness"],
+            },
+          ],
+        },
+        {
+          id: "motivation_core",
+          prompt: "بیشترین انگیزه را چه چیزی به شما می‌دهد؟",
+          options: [
+            {
+              k: "achievement",
+              label: "دستاورد و پیشرفت",
+              tags: ["Ambition", "Determination"],
+            },
+            {
+              k: "discovery",
+              label: "کنجکاوی و خلاقیت",
+              tags: ["Curiosity", "Creativity"],
+            },
+            {
+              k: "connection",
+              label: "ارتباط با یکدیگر و معنا احساسی",
+              tags: ["Empathy", "Kindness"],
+            },
+            {
+              k: "stability",
+              label: "ثبات و نظم درونی",
+              tags: ["Moral Rigidity", "Detachment"],
+            },
+          ],
+        },
+        {
+          id: "pace",
+          prompt: "ریتم عمل‌کردن شما…",
+          options: [
+            {
+              k: "careful",
+              label: "آهسته و روش‌مند",
+              tags: ["Logic", "Moral Rigidity"],
+            },
+            { k: "steady", label: "ثابت و صبور", tags: ["Determination"] },
+            {
+              k: "rapid",
+              label: "سریع و واکنشی",
+              tags: ["Impulsiveness", "Adaptability"],
+            },
+          ],
+        },
+      ];
+
+      function startPhase4() {
+        const picked5 = pickN(PREFS_POOL, 5);
+        const animeTypeQ = {
+          id: "anime_type",
+          prompt:
+            "اگر در دنیایی مانند انواع انیمه زندگی می‌کردید، کدام نوع بیشتر به شما می‌خورد؟",
+          options: [
+            { k: "Shonen", label: "شوونن (اکشن)", tags: [] },
+            { k: "Psychological", label: "روان‌شناختی و فلسفی", tags: [] },
+            { k: "Romantic", label: "احساسی و عاشقانه", tags: [] },
+            { k: "Fantasy", label: "فانتزی و خیال‌انگیز", tags: [] },
+          ],
+          isAnimeType: true,
+        };
+        PREFS_PICKED = [...picked5, animeTypeQ];
+
+        const host = byId("qPrefs");
+        host.innerHTML = "";
+        PREFS_ANS = {};
+        PREFS_TAG_TALLY = {};
+        PREFS_PICKED.forEach((q, i) => {
+          const div = document.createElement("div");
+          div.className = "q";
+          const label = q.isAnimeType
+            ? `${q.prompt} <span class="pill">نوع انیمه</span>`
+            : q.prompt;
+          const options = q.options
+            .map(
+              (opt) => `
+      <label class="opt"><input type="radio" name="pref_${i}" value="${opt.k}">${opt.label}</label>
+    `
+            )
+            .join("");
+          div.innerHTML = `<div><b>${i + 1}.</b> ${label}</div>${options}`;
+          host.appendChild(div);
+        });
+        host.addEventListener("change", updatePrefsProgress);
+        updatePrefsProgress();
+
+        byId("toPhase5").onclick = () => {
+          const answered = Object.keys(PREFS_ANS).length;
+          if (answered !== PREFS_PICKED.length) {
+            alert("لطفاً به هر ۶ سوال ترجیحات پاسخ دهید.");
+            return;
+          }
+          USER_ANIME_TYPE = null;
+          PREFS_TAG_TALLY = {};
+          PREFS_PICKED.forEach((q, i) => {
+            const choice = PREFS_ANS[`pref_${i}`];
+            const opt = q.options.find((o) => o.k === choice);
+            if (q.isAnimeType) {
+              USER_ANIME_TYPE = choice;
+            } else if (opt && opt.tags) {
+              opt.tags.forEach((t) => {
+                const k = title(t);
+                if (ALLOWED_TRAITS.includes(k))
+                  PREFS_TAG_TALLY[k] = (PREFS_TAG_TALLY[k] || 0) + 1;
+              });
+            }
+          });
+
+          byId("phase4").classList.add("hide");
+          startPhase5();
+          byId("phase5").classList.remove("hide");
+        };
+      }
+
+      function updatePrefsProgress() {
+        const groups = [...document.querySelectorAll("#qPrefs .q")];
+        let answered = 0;
+        groups.forEach((g, i) => {
+          const checked = g.querySelector("input[type=radio]:checked");
+          if (checked) {
+            answered++;
+            PREFS_ANS[`pref_${i}`] = checked.value;
+          }
+        });
+        byId(
+          "cPref"
+        ).textContent = `${answered}/${PREFS_PICKED.length} پاسخ داده شده`;
+        byId("pPref").style.width =
+          (answered / PREFS_PICKED.length) * 100 + "%";
+      }
+
+      /* ====== Phase 5: Adaptive (5) ====== */
+      function buildAdaptiveFromTop(chars, total = 5) {
+        const theme = new Map();
+        const decision = new Map();
+        const bump = (m, key) => {
+          if (!key) return;
+          const k = title(key);
+          m.set(k, (m.get(k) || 0) + 1);
+        };
+        chars.forEach((c) => {
+          (c.motivation?.themes || []).forEach((t) => bump(theme, t));
+          (c.key_decisions?.length ? c.key_decisions : []).forEach((d) => {
+            bump(decision, d.theme);
+            bump(decision, d.choice_type);
+          });
+        });
+        const sortMap = (m) =>
+          [...m.entries()].sort((a, b) => b[1] - a[1]).map((x) => x[0]);
+        const themes = sortMap(theme);
+        const decisions = sortMap(decision);
+
+        const picked = [];
+        const seen = new Set();
+        const normalizeKey = (key) => title(key || "");
+        const takeNext = (arr, type) => {
+          while (arr.length) {
+            const key = arr.shift();
+            const norm = normalizeKey(key);
+            if (!norm || seen.has(norm)) continue;
+            seen.add(norm);
+            picked.push({ type, key });
+            return true;
+          }
+          return false;
+        };
+        let i = 0;
+        while (picked.length < total && (themes.length || decisions.length)) {
+          const preferTheme = i % 2 === 0;
+          const grabbed = preferTheme
+            ? takeNext(themes, "theme")
+            : takeNext(decisions, "decision");
+          if (!grabbed) {
+            const fallback = preferTheme ? decisions : themes;
+            const fallbackType = preferTheme ? "decision" : "theme";
+            takeNext(fallback, fallbackType);
+          }
+          i++;
+        }
+        const pool = [
+          ...themes.map((k) => ({ type: "theme", key: k })),
+          ...decisions.map((k) => ({ type: "decision", key: k })),
+        ].filter((p) => {
+          const norm = normalizeKey(p.key);
+          if (!norm || seen.has(norm)) return false;
+          seen.add(norm);
+          return true;
+        });
+        while (picked.length < total && pool.length) picked.push(pool.shift());
+
+        return picked.map((p) => ({
+          ...p,
+          label:
+            p.type === "theme"
+              ? `تا چه اندازه با تم «${p.key}» همذات‌پنداری می‌کنید؟`
+              : `اگر موقعیتی «${p.key}» را ببینید، چقدر احتمال دارد آن را انتخاب کنید؟`,
+        }));
+      }
+
+      function startPhase5() {
+        // recompute top after secondary merge
+        const finalKeys = ALL_TRAIT_KEYS.length
+          ? ALL_TRAIT_KEYS
+          : P1_TRAIT_KEYS;
+        const userVec = getUserMergedVector();
+        const scored = CHARACTERS.map((c) => {
+          const cv = getCharVectorForKeys(c, finalKeys);
+          let s = cosineSim(userVec, cv, finalKeys);
+          if (USER_MBTI && (c.mbti || "").toUpperCase() === USER_MBTI)
+            s += 0.04;
+          return { c, score: s };
+        }).sort((a, b) => b.score - a.score);
+        const top20 = scored.slice(0, 20).map((x) => x.c);
+
+        ADAPTIVE_QS = buildAdaptiveFromTop(top20, 5);
+        ADAPTIVE_ANS = {};
+        const host = byId("qAdaptive");
+        host.innerHTML = "";
+
+        ADAPTIVE_QS.forEach((q, i) => {
+          const div = document.createElement("div");
+          div.className = "q";
+          div.innerHTML = `
+      <div><b>${i + 1}.</b> ${q.label} 
+        <span class="pill">${TYPE_LABELS[q.type] || q.type}</span>
+      </div>
+      <div class="likert" data-key="${q.key}">
+        ${[1, 2, 3, 4, 5]
+          .map(
+            (v) =>
+              `<label><input type="radio" name="ad_${i}" value="${v}"> ${v}</label>`
+          )
+          .join("")}
+      </div>`;
+          host.appendChild(div);
+        });
+
+        host.addEventListener("change", updateAdaptiveProgress);
+        updateAdaptiveProgress(); // just update visuals (don’t assign)
+
+        byId("seeResults").onclick = () => {
+          if (Object.keys(ADAPTIVE_ANS).length !== ADAPTIVE_QS.length) {
+            alert("لطفاً به هر ۵ سوال تطبیقی پاسخ دهید.");
+            return;
+          }
+          byId("phase5").classList.add("hide");
+          showResults();
+        };
+      }
+
+      function updateAdaptiveProgress() {
+        const groups = [...document.querySelectorAll("#qAdaptive .likert")];
+        let answered = 0;
+        ADAPTIVE_ANS = {};
+        groups.forEach((g) => {
+          const checked = g.querySelector("input:checked");
+          if (checked) {
+            answered++;
+            ADAPTIVE_ANS[title(g.dataset.key)] = Number(checked.value);
+          }
+        });
+        byId("cA").textContent = `${answered}/5 پاسخ داده شده`;
+        byId("pA").style.width = (answered / 5) * 100 + "%";
+
+        // optional: persist answers
+        localStorage.setItem("adaptiveAns", JSON.stringify(ADAPTIVE_ANS));
+
+        return ADAPTIVE_ANS;
+      }
+
+      /* ====== Merge user vectors & scoring ====== */
+      function getUserMergedVector() {
+        // Merge P1 and P3: average when both present
+        const keys = new Set([...Object.keys(P1_VEC), ...Object.keys(P3_VEC)]);
+        const out = {};
+        keys.forEach((k) => {
+          const hasP1 = k in P1_VEC;
+          const hasP3 = k in P3_VEC;
+          if (hasP1 && hasP3) out[k] = (P1_VEC[k] + P3_VEC[k]) / 2;
+          else out[k] = hasP1 ? P1_VEC[k] : P3_VEC[k];
+        });
+        return out;
+      }
+
+      function computeSimilarity(c) {
+        const keys = ALL_TRAIT_KEYS.length ? ALL_TRAIT_KEYS : P1_TRAIT_KEYS;
+        const userVec = getUserMergedVector();
+        const cv = getCharVectorForKeys(c, keys);
+        let sim = cosineSim(userVec, cv, keys);
+
+        // MBTI
+        if (USER_MBTI && (c.mbti || "").toUpperCase() === USER_MBTI)
+          sim += 0.05;
+
+        // Pref tags bonus (only allowed traits counted)
+        const charTags = new Set([
+          ...(c.motivation?.themes || []).map(title),
+          ...(c.key_decisions || [])
+            .flatMap((d) => [title(d.theme), title(d.choice_type)])
+            .filter(Boolean),
+        ]);
+        Object.entries(PREFS_TAG_TALLY).forEach(([tag, count]) => {
+          if (charTags.has(tag)) sim += 0.01 * count;
+        });
+
+        // Adaptive scaled
+        const scaled = Object.fromEntries(
+          Object.entries(ADAPTIVE_ANS).map(([k, v]) => [k, (v - 1) / 4])
+        ); // 0..1
+        const addIf = (txt) => {
+          if (!txt) return;
+          const k = title(txt);
+          if (scaled.hasOwnProperty(k)) sim += 0.015 * scaled[k];
+        };
+        (c.motivation?.themes || []).forEach(addIf);
+        (c.key_decisions || []).forEach((d) => {
+          addIf(d.theme);
+          addIf(d.choice_type);
+        });
+
+        // anime_type
+        if (
+          USER_ANIME_TYPE &&
+          Array.isArray(c.anime_type) &&
+          c.anime_type.map(title).includes(title(USER_ANIME_TYPE))
+        ) {
+          sim += 0.02; // reduced impact
+        }
+
+        return clamp(sim, 0, 1);
+      }
+
+      /* ====== Results ====== */
+      function topAlignedTraits(c, n = 3) {
+        const keys = ALL_TRAIT_KEYS.length ? ALL_TRAIT_KEYS : P1_TRAIT_KEYS;
+        const userVec = getUserMergedVector();
+        const cv = getCharVectorForKeys(c, keys);
+        const diffs = keys
+          .map((tr) => {
+            const u = userVec[tr] || 0,
+              v = cv[tr] || 0;
+            return { trait: tr, user: u, char: v, gap: -Math.abs(u - v) };
+          })
+          .sort((a, b) => b.gap - a.gap);
+        return diffs
+          .slice(0, n)
+          .map(
+            (d) =>
+              `${traitLabel(d.trait)} (شما ${d.user.toFixed(
+                1
+              )} در برابر ${d.char.toFixed(1)})`
+          );
+      }
+
+      function buildComparisonTable(c) {
+        const keys = ALL_TRAIT_KEYS.length ? ALL_TRAIT_KEYS : P1_TRAIT_KEYS;
+        const userVec = getUserMergedVector();
+        const cv = getCharVectorForKeys(c, keys);
+        const rows = keys
+          .map((tr) => {
+            const u = userVec[tr] || 0,
+              v = cv[tr] || 0,
+              diff = (u - v).toFixed(1);
+            return `<tr><td>${traitLabel(tr)}</td><td class="right">${u.toFixed(
+              1
+            )}</td><td class="right">${v.toFixed(
+              1
+            )}</td><td class="right">${diff}</td></tr>`;
+          })
+          .join("");
+        return `
+    <div class="details">
+      <table>
+        <thead><tr><th>ویژگی</th><th class="right">شما (میانگین)</th><th class="right">شخصیت (میانگین)</th><th class="right">تفاوت شما-شخصیت</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+      }
+
+      function renderUserTables() {
+        const r1 = Object.keys(P1_VEC)
+          .sort()
+          .map(
+            (tr) =>
+              `<tr><td>${traitLabel(tr)}</td><td class="right">${(
+                P1_VEC[tr] || 0
+              ).toFixed(1)}</td></tr>`
+          )
+          .join("");
+        byId("userPrimary").innerHTML = `
+    <table><thead><tr><th>ویژگی</th><th class="right">امتیاز</th></tr></thead><tbody>${r1}</tbody></table>
+  `;
+        const r2 = Object.keys(P3_VEC)
+          .sort()
+          .map(
+            (tr) =>
+              `<tr><td>${traitLabel(tr)}</td><td class="right">${(
+                P3_VEC[tr] || 0
+              ).toFixed(1)}</td></tr>`
+          )
+          .join("");
+        byId("userSecondary").innerHTML = `
+    <table><thead><tr><th>ویژگی</th><th class="right">امتیاز</th></tr></thead><tbody>${r2}</tbody></table>
+  `;
+      }
+
+      function showResults() {
+        const scored = CHARACTERS.map((c) => ({
+          c,
+          sim: computeSimilarity(c),
+        })).sort((a, b) => b.sim - a.sim);
+        const top = scored[0];
+
+        byId("yourType").innerHTML = USER_ANIME_TYPE
+          ? `نوع انیمه‌ی شما: <span class="ltr">${USER_ANIME_TYPE}</span>`
+          : "نوع انیمه‌ی شما: —";
+
+        const explain = topAlignedTraits(top.c, 3);
+        byId("topOne").innerHTML = `
+    <div>
+      <div style="font-weight:700">${top.c.name}</div>
+      <div class="muted"><i>${top.c.anime_name}</i> • MBTI: ${
+          top.c.mbti || "—"
+        }</div>
+      <div class="traits" style="margin-top:6px">
+        ${explain.map((t) => `<span class="pill">${t}</span>`).join("")}
+      </div>
+    </div>
+    <div style="min-width:90px;text-align:right;font-weight:700;direction:ltr;">${toPct(
+      top.sim
+    )}</div>
+  `;
+
+        const top30 = scored.slice(0, 30);
+        byId("topList").innerHTML = top30
+          .map((t, i) => {
+            const id = `det_${i}`;
+            const why = topAlignedTraits(t.c, 2)
+              .map((x) => `<span class="pill">${x}</span>`)
+              .join(" ");
+            return `
+      <div class="result-item">
+        <div style="flex:1">
+          <div><b>#${i + 1}</b> ${t.c.name} <span class="muted">— <i>${
+              t.c.anime_name
+            }</i></span></div>
+          <div class="muted">MBTI: ${t.c.mbti || "—"}</div>
+          <div class="traits" style="margin-top:6px">${why}</div>
+          <button class="btn btn-ghost small" data-toggle="${id}">نمایش جزئیات</button>
+          <div id="${id}" class="hide"></div>
+        </div>
+        <div style="min-width:80px;text-align:right;font-weight:700;direction:ltr;">${toPct(
+          t.sim
+        )}</div>
+      </div>`;
+          })
+          .join("");
+
+        byId("topList").addEventListener("click", (e) => {
+          const btn = e.target.closest("button[data-toggle]");
+          if (!btn) return;
+          const id = btn.getAttribute("data-toggle");
+          const idx = Number(id.split("_")[1]);
+          const holder = byId(id);
+          if (holder.classList.contains("hide")) {
+            if (!holder.dataset.built) {
+              holder.innerHTML = buildComparisonTable(top30[idx].c);
+              holder.dataset.built = "1";
+            }
+            holder.classList.remove("hide");
+            btn.textContent = "پنهان کردن جزئیات";
+          } else {
+            holder.classList.add("hide");
+            btn.textContent = "نمایش جزئیات";
+          }
+        });
+
+        renderUserTables();
+        byId("results").classList.remove("hide");
+      }
+    </script>
+  </body>
+</html>
