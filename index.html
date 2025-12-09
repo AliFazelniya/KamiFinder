@@ -490,7 +490,7 @@
         return denom ? dot / denom : 0;
       }
 
-      /* ====== Load JSON ====== */
+      /* ====== Load JSON via backend.php (GET) ====== */
       byId("loadBtn").onclick = async () => {
         try {
           const res = await fetch("backend.php", { cache: "no-store" });
@@ -510,7 +510,7 @@
       };
 
       /* ====== Phase 1: 25 Primary (weighted, allowed traits only) ====== */
-      const Q = (id, text, traits) => ({ id, text, traits }); // traits = {TraitName: weight} (weights can be negative for inverse phrasing)
+      const Q = (id, text, traits) => ({ id, text, traits }); // traits = {TraitName: weight}
 
       // 25 primary questions
       const P1_BANK = [
@@ -704,7 +704,7 @@
             const q = P1_BANK[i];
             for (const [trait, wt] of Object.entries(q.traits)) {
               if (!P1_REC[trait]) P1_REC[trait] = { sum: 0, w: 0 };
-              P1_REC[trait].sum += val * wt; // negative weights invert effect for inverse phrasing
+              P1_REC[trait].sum += val * wt; // negative weights invert effect
               P1_REC[trait].w += Math.abs(wt);
             }
           }
@@ -737,7 +737,7 @@
       /* ====== Phase 3: Secondary Bank (35) → pick 15 ====== */
       const S = (id, text, traits) => ({ id, text, traits });
 
-      // 35 secondary questions — ONLY allowed traits; mix of direct negs and inversions via negative weights
+      // 35 secondary questions — ONLY allowed traits
       SEC_BANK = [
         S(1, "به موقعیت‌های پرریسک جذب می‌شوم.", {
           Ambition: 0.8,
@@ -747,7 +747,7 @@
         S(2, "حتی اگر مغرور به نظر برسد رک صحبت می‌کنم.", {
           Arrogance: 1.0,
           Confidence: 0.0,
-        }), // Arrogance only (Confidence ignored)
+        }),
         S(3, "برای رسیدن به نتیجه دیگران را نامحسوس هدایت می‌کنم.", {
           Manipulativeness: 1.0,
           Strategy: 0.4,
@@ -811,7 +811,7 @@
             Strategy: 0.4,
             Aggressiveness: 0.0,
           }
-        ), // no Aggressiveness in allowed set
+        ),
         S(13, "در کار گروهی، هماهنگی را بر رقابت ترجیح می‌دهم.", {
           Teamwork: 0.8,
           Empathy: 0.6,
@@ -886,7 +886,7 @@
           Resentment: 0.0,
           Overattachment: 0.6,
           Stubbornness: 0.6,
-        }), // no Resentment in allowed set → removed weight
+        }),
         S(27, "برنامه‌ریزی دقیق را به بداهه‌پردازی ترجیح می‌دهم.", {
           Strategy: 0.8,
           Logic: 0.6,
@@ -940,9 +940,8 @@
           Morality: 0.7,
           Logic: 0.5,
           Integrity: 0.0,
-        }), // Integrity not allowed → ignored
+        }),
       ].map((q) => {
-        // sanitize: drop any weights whose trait isn't allowed
         const cleanTraits = {};
         Object.entries(q.traits).forEach(([t, w]) => {
           if (ALLOWED_TRAITS.includes(t) && w !== 0) cleanTraits[t] = w;
@@ -976,7 +975,7 @@
       function select15Secondary() {
         const imp = computeTraitImportanceFromTop(CURRENT_TOP20);
         const ranked = rankSecondaryQuestions(imp);
-        const CAP = 3; // cap per primary trait
+        const CAP = 3;
         const chosen = [];
         const capCount = {};
         for (const item of ranked) {
@@ -1037,7 +1036,6 @@
             alert("لطفاً به تمام ۱۵ سوال پاسخ دهید.");
             return;
           }
-          // build averaged P3_VEC
           P3_VEC = {};
           Object.entries(P3_REC).forEach(([t, { sum, w }]) => {
             P3_VEC[t] = sum / Math.max(1e-9, w);
@@ -1365,7 +1363,6 @@
       }
 
       function startPhase5() {
-        // recompute top after secondary merge
         const finalKeys = ALL_TRAIT_KEYS.length
           ? ALL_TRAIT_KEYS
           : P1_TRAIT_KEYS;
@@ -1403,7 +1400,7 @@
         });
 
         host.addEventListener("change", updateAdaptiveProgress);
-        updateAdaptiveProgress(); // just update visuals (don’t assign)
+        updateAdaptiveProgress();
 
         byId("seeResults").onclick = () => {
           if (Object.keys(ADAPTIVE_ANS).length !== ADAPTIVE_QS.length) {
@@ -1429,15 +1426,40 @@
         byId("cA").textContent = `${answered}/5 پاسخ داده شده`;
         byId("pA").style.width = (answered / 5) * 100 + "%";
 
-        // optional: persist answers
         localStorage.setItem("adaptiveAns", JSON.stringify(ADAPTIVE_ANS));
 
         return ADAPTIVE_ANS;
       }
 
-      /* ====== Merge user vectors & scoring ====== */
+      /* ====== جمع کردن جواب‌های فاز ۱ و ۳ برای ارسال به PHP ====== */
+      function collectP1Answers() {
+        const res = {};
+        const groups = document.querySelectorAll("#qPPrimary .likert");
+        groups.forEach((g) => {
+          const qid = Number(g.dataset.qid);
+          const checked = g.querySelector("input[type=radio]:checked");
+          if (checked && qid) {
+            res[qid] = Number(checked.value);
+          }
+        });
+        return res;
+      }
+
+      function collectP3Answers() {
+        const res = {};
+        const groups = document.querySelectorAll("#qPSecondary .likert");
+        groups.forEach((g) => {
+          const qid = Number(g.dataset.qid);
+          const checked = g.querySelector("input[type=radio]:checked");
+          if (checked && qid) {
+            res[qid] = Number(checked.value);
+          }
+        });
+        return res;
+      }
+
+      /* ====== Merge user vectors (for display & trait comparisons) ====== */
       function getUserMergedVector() {
-        // Merge P1 and P3: average when both present
         const keys = new Set([...Object.keys(P1_VEC), ...Object.keys(P3_VEC)]);
         const out = {};
         keys.forEach((k) => {
@@ -1449,55 +1471,7 @@
         return out;
       }
 
-      function computeSimilarity(c) {
-        const keys = ALL_TRAIT_KEYS.length ? ALL_TRAIT_KEYS : P1_TRAIT_KEYS;
-        const userVec = getUserMergedVector();
-        const cv = getCharVectorForKeys(c, keys);
-        let sim = cosineSim(userVec, cv, keys);
-
-        // MBTI
-        if (USER_MBTI && (c.mbti || "").toUpperCase() === USER_MBTI)
-          sim += 0.05;
-
-        // Pref tags bonus (only allowed traits counted)
-        const charTags = new Set([
-          ...(c.motivation?.themes || []).map(title),
-          ...(c.key_decisions || [])
-            .flatMap((d) => [title(d.theme), title(d.choice_type)])
-            .filter(Boolean),
-        ]);
-        Object.entries(PREFS_TAG_TALLY).forEach(([tag, count]) => {
-          if (charTags.has(tag)) sim += 0.01 * count;
-        });
-
-        // Adaptive scaled
-        const scaled = Object.fromEntries(
-          Object.entries(ADAPTIVE_ANS).map(([k, v]) => [k, (v - 1) / 4])
-        ); // 0..1
-        const addIf = (txt) => {
-          if (!txt) return;
-          const k = title(txt);
-          if (scaled.hasOwnProperty(k)) sim += 0.015 * scaled[k];
-        };
-        (c.motivation?.themes || []).forEach(addIf);
-        (c.key_decisions || []).forEach((d) => {
-          addIf(d.theme);
-          addIf(d.choice_type);
-        });
-
-        // anime_type
-        if (
-          USER_ANIME_TYPE &&
-          Array.isArray(c.anime_type) &&
-          c.anime_type.map(title).includes(title(USER_ANIME_TYPE))
-        ) {
-          sim += 0.02; // reduced impact
-        }
-
-        return clamp(sim, 0, 1);
-      }
-
-      /* ====== Results ====== */
+      /* ====== Results helper (trait comparisons) ====== */
       function topAlignedTraits(c, n = 3) {
         const keys = ALL_TRAIT_KEYS.length ? ALL_TRAIT_KEYS : P1_TRAIT_KEYS;
         const userVec = getUserMergedVector();
@@ -1571,79 +1545,138 @@
   `;
       }
 
-      function showResults() {
-        const scored = CHARACTERS.map((c) => ({
-          c,
-          sim: computeSimilarity(c),
-        })).sort((a, b) => b.sim - a.sim);
-        const top = scored[0];
+      /* ====== showResults: ارسال به backend.php (POST) و رندر خروجی ====== */
+      async function showResults() {
+        const p1Answers = collectP1Answers();
+        const p3Answers = collectP3Answers();
 
-        byId("yourType").innerHTML = USER_ANIME_TYPE
-          ? `نوع انیمه‌ی شما: <span class="ltr">${USER_ANIME_TYPE}</span>`
-          : "نوع انیمه‌ی شما: —";
+        const payload = {
+          p1Answers,
+          p3Answers,
+          mbti: USER_MBTI || "",
+          animeType: USER_ANIME_TYPE || null,
+          prefsTagTally: PREFS_TAG_TALLY || {},
+          adaptiveAns: ADAPTIVE_ANS || {},
+        };
 
-        const explain = topAlignedTraits(top.c, 3);
-        byId("topOne").innerHTML = `
-    <div>
-      <div style="font-weight:700">${top.c.name}</div>
-      <div class="muted"><i>${top.c.anime_name}</i> • MBTI: ${
-          top.c.mbti || "—"
-        }</div>
-      <div class="traits" style="margin-top:6px">
-        ${explain.map((t) => `<span class="pill">${t}</span>`).join("")}
-      </div>
-    </div>
-    <div style="min-width:90px;text-align:right;font-weight:700;direction:ltr;">${toPct(
-      top.sim
-    )}</div>
-  `;
-
-        const top30 = scored.slice(0, 30);
-        byId("topList").innerHTML = top30
-          .map((t, i) => {
-            const id = `det_${i}`;
-            const why = topAlignedTraits(t.c, 2)
-              .map((x) => `<span class="pill">${x}</span>`)
-              .join(" ");
-            return `
-      <div class="result-item">
-        <div style="flex:1">
-          <div><b>#${i + 1}</b> ${t.c.name} <span class="muted">— <i>${
-              t.c.anime_name
-            }</i></span></div>
-          <div class="muted">MBTI: ${t.c.mbti || "—"}</div>
-          <div class="traits" style="margin-top:6px">${why}</div>
-          <button class="btn btn-ghost small" data-toggle="${id}">نمایش جزئیات</button>
-          <div id="${id}" class="hide"></div>
-        </div>
-        <div style="min-width:80px;text-align:right;font-weight:700;direction:ltr;">${toPct(
-          t.sim
-        )}</div>
-      </div>`;
-          })
-          .join("");
-
-        byId("topList").addEventListener("click", (e) => {
-          const btn = e.target.closest("button[data-toggle]");
-          if (!btn) return;
-          const id = btn.getAttribute("data-toggle");
-          const idx = Number(id.split("_")[1]);
-          const holder = byId(id);
-          if (holder.classList.contains("hide")) {
-            if (!holder.dataset.built) {
-              holder.innerHTML = buildComparisonTable(top30[idx].c);
-              holder.dataset.built = "1";
-            }
-            holder.classList.remove("hide");
-            btn.textContent = "پنهان کردن جزئیات";
-          } else {
-            holder.classList.add("hide");
-            btn.textContent = "نمایش جزئیات";
-          }
-        });
-
-        renderUserTables();
         byId("results").classList.remove("hide");
+        byId("results").innerHTML =
+          '<div class="muted">در حال محاسبه‌ی نتایج روی سرور...</div>';
+
+        try {
+          const res = await fetch("backend.php", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            throw new Error(res.status + " " + res.statusText);
+          }
+
+          const data = await res.json();
+          if (!data || !data.topOne || !data.topList) {
+            throw new Error("پاسخ نامعتبر از سرور");
+          }
+
+          const top = data.topOne; // {character, sim}
+          const top30 = data.topList;
+
+          byId("results").innerHTML = `
+      <h2>۷) نتایج شما</h2>
+      <div class="muted" id="yourType"></div>
+      <div id="topOne" class="result-item" style="margin-top: 10px"></div>
+
+      <h3 style="margin-top: 20px">۳۰ شخصیت مشابه برتر</h3>
+      <div id="topList"></div>
+
+      <h3 style="margin-top: 24px">میانگین امتیاز ویژگی‌های اصلی شما</h3>
+      <div id="userPrimary"></div>
+
+      <h3 style="margin-top: 24px">میانگین امتیاز ویژگی‌های ثانویه شما</h3>
+      <div id="userSecondary"></div>
+
+      <div class="note small">
+        برای دیدن مقایسه‌ی جزءبه‌جزء ویژگی‌ها روی «نمایش جزئیات» در کنار هر
+        شخصیت کلیک کنید (تمام ویژگی‌های به‌کاررفته در آزمون).
+      </div>
+    `;
+
+          byId("yourType").innerHTML = USER_ANIME_TYPE
+            ? `نوع انیمه‌ی شما: <span class="ltr">${USER_ANIME_TYPE}</span>`
+            : "نوع انیمه‌ی شما: —";
+
+          const explain = topAlignedTraits(top.character, 3);
+          byId("topOne").innerHTML = `
+      <div>
+        <div style="font-weight:700">${top.character.name}</div>
+        <div class="muted"><i>${top.character.anime_name}</i> • MBTI: ${
+          top.character.mbti || "—"
+        }</div>
+        <div class="traits" style="margin-top:6px">
+          ${explain.map((t) => `<span class="pill">${t}</span>`).join("")}
+        </div>
+      </div>
+      <div style="min-width:90px;text-align:right;font-weight:700;direction:ltr;">${toPct(
+        top.sim
+      )}</div>
+    `;
+
+          byId("topList").innerHTML = top30
+            .map((t, i) => {
+              const id = `det_${i}`;
+              const why = topAlignedTraits(t.character, 2)
+                .map((x) => `<span class="pill">${x}</span>`)
+                .join(" ");
+              return `
+        <div class="result-item">
+          <div style="flex:1">
+            <div><b>#${i + 1}</b> ${t.character.name} <span class="muted">— <i>${
+                t.character.anime_name
+              }</i></span></div>
+            <div class="muted">MBTI: ${t.character.mbti || "—"}</div>
+            <div class="traits" style="margin-top:6px">${why}</div>
+            <button class="btn btn-ghost small" data-toggle="${id}">نمایش جزئیات</button>
+            <div id="${id}" class="hide"></div>
+          </div>
+          <div style="min-width:80px;text-align:right;font-weight:700;direction:ltr;">${toPct(
+            t.sim
+          )}</div>
+        </div>`;
+            })
+            .join("");
+
+          byId("topList").addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-toggle]");
+            if (!btn) return;
+            const id = btn.getAttribute("data-toggle");
+            const idx = Number(id.split("_")[1]);
+            const holder = byId(id);
+            if (holder.classList.contains("hide")) {
+              if (!holder.dataset.built) {
+                holder.innerHTML = buildComparisonTable(top30[idx].character);
+                holder.dataset.built = "1";
+              }
+              holder.classList.remove("hide");
+              btn.textContent = "پنهان کردن جزئیات";
+            } else {
+              holder.classList.add("hide");
+              btn.textContent = "نمایش جزئیات";
+            }
+          });
+
+          renderUserTables();
+        } catch (err) {
+          console.error(err);
+          byId("results").innerHTML = `
+      <div class="note">
+        خطا در محاسبه‌ی نتایج روی سرور: ${err.message}<br>
+        لطفاً بعداً دوباره تلاش کنید.
+      </div>
+    `;
+        }
       }
     </script>
   </body>
