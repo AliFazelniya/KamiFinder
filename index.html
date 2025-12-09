@@ -197,9 +197,9 @@
     <div id="load" class="card">
       <h2>۱) بارگذاری داده‌های شخصیت</h2>
       <p class="muted">
-        فایل‌های <b>index.html</b> و <b>updated.json</b> را کنار هم قرار دهید.
-        اگر بارگذاری انجام نشد، یک سرور محلی راه‌اندازی کنید (<code
-          >python -m http.server 8000</code
+        فایل‌های <b>index.html</b> ، <b>backend.php</b> و <b>updated.json</b> را
+        کنار هم قرار دهید. سپس یک سرور PHP راه‌اندازی کنید (<code
+          >php -S localhost:8000</code
         >) و آدرس <code>http://localhost:8000</code> را باز کنید.
       </p>
       <div class="note hide" id="loadNote"></div>
@@ -493,7 +493,7 @@
       /* ====== Load JSON ====== */
       byId("loadBtn").onclick = async () => {
         try {
-          const res = await fetch("updated.json", { cache: "no-store" });
+          const res = await fetch("backend.php", { cache: "no-store" });
           if (!res.ok) throw new Error(res.status + " " + res.statusText);
           CHARACTERS = await res.json();
           byId("load").classList.add("hide");
@@ -502,8 +502,8 @@
           byId("loadNote").innerHTML = `
       <b>فایل <code>updated.json</code> بارگذاری نشد.</b><br>
       خطا: ${e.message}<br><br>
-      <b>راه‌حل:</b> این پوشه را با یک سرور محلی اجرا کنید.<br>
-      مثال: <code>python -m http.server 8000</code> → سپس <code>http://localhost:8000</code> را باز کنید.
+      <b>راه‌حل:</b> این پوشه را با یک سرور PHP اجرا کنید.<br>
+      مثال: <code>php -S localhost:8000</code> → سپس <code>http://localhost:8000</code> را باز کنید.
     `;
           byId("loadNote").classList.remove("hide");
         }
